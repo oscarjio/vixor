@@ -5,6 +5,9 @@ on:
     branches: [main]
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -42,3 +45,14 @@ jobs:
         with:
           name: Vixor-debug-apk
           path: android/app/build/outputs/apk/debug/app-debug.apk
+
+      - name: Publicera som release "latest"
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cp android/app/build/outputs/apk/debug/app-debug.apk Vixor.apk
+          gh release delete latest --yes --cleanup-tag || true
+          gh release create latest Vixor.apk \
+            --title "Vixor (senaste bygget)" \
+            --notes "Automatiskt bygge av commit ${GITHUB_SHA::7}" \
+            --target "${GITHUB_SHA}"

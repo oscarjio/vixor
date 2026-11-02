@@ -4,8 +4,8 @@ Android-app för att **rikta in en antenn mot en mast** och en inbyggd **NanoVNA
 
 ## Installera
 
-Ladda ner `apk/Vixor.apk` på telefonen och öppna filen. Android frågar om tillåtelse att installera från okända källor första gången.
-Filen är signerad med en debug-nyckel. Uppdaterar du med en APK som byggts på annat sätt (t.ex. av GitHub Actions) måste du först avinstallera den gamla.
+Ladda ner senaste APK från [Releases](https://github.com/oscarjio/vixor/releases/latest) (byggs automatiskt av GitHub Actions) eller från `apk/Vixor.apk` på telefonen och öppna filen. Android frågar om tillåtelse att installera från okända källor första gången.
+Alla byggen signeras med samma fasta debugnyckel (`android/debug.keystore`, inte hemlig eftersom repot är publikt), så en ny APK går att installera över en gammal.
 
 ## Funktioner
 
