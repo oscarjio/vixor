@@ -1,0 +1,20 @@
+{
+  "name": "vixor",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Vixor - antennguide och riktningsverktyg (NanoVNA, LOGMAG, SWR, Smith)",
+  "scripts": {
+    "test": "node --test test/*.test.mjs",
+    "sync": "cap sync android",
+    "assets": "capacitor-assets generate --android"
+  },
+  "dependencies": {
+    "@capacitor/android": "^8.6.0",
+    "@capacitor/core": "^8.6.0",
+    "@capacitor/geolocation": "^8.2.4"
+  },
+  "devDependencies": {
+    "@capacitor/assets": "^4.0.0",
+    "@capacitor/cli": "^8.6.0"
+  }
+}

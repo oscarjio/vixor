@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#0e1217">
+<title>Vixor</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="top">
+  <img src="img/vixor-symbol.png" alt="" class="brand">
+  <div>
+    <div class="app-title">Vixor</div>
+    <div class="app-sub">Antennriktning &amp; NanoVNA-guide</div>
+  </div>
+</header>
+
+<main>
+<!-- ===================== RIKTA ===================== -->
+<section id="view-aim" class="view active">
+  <label class="field">
+    <span>Mast</span>
+    <select id="mast-select"></select>
+  </label>
+  <div id="no-mast" class="card hint" hidden>
+    Lägg till en mast under fliken <b>Master</b> (koordinater eller Maps-länk) så visas riktningen här.
+  </div>
+
+  <div id="aim-body">
+    <div id="status-banner" class="banner bad">Tryck på Starta</div>
+
+    <div class="dial-wrap">
+      <svg id="dial" viewBox="-150 -150 300 300" aria-label="Kompass">
+        <circle r="140" class="dial-bg"/>
+        <g id="ring"></g>
+        <g id="mast-mark"></g>
+        <circle r="6" class="dial-center"/>
+        <path d="M0,-96 L16,-60 L5,-60 L5,40 L-5,40 L-5,-60 L-16,-60 Z" id="arrow" class="arrow"/>
+        <path d="M-9,-148 L9,-148 L0,-130 Z" class="lubber"/>
+      </svg>
+      <div id="turn-text" class="turn-text">–</div>
+    </div>
+
+    <div class="grid">
+      <div class="stat"><div class="k">Riktning mot mast (sann)</div><div class="v" id="v-bearing">–</div></div>
+      <div class="stat"><div class="k">Du pekar mot (sann)</div><div class="v" id="v-heading">–</div></div>
+      <div class="stat"><div class="k">Avstånd</div><div class="v" id="v-dist">–</div></div>
+      <div class="stat"><div class="k">Din position</div><div class="v small" id="v-pos">–</div></div>
+    </div>
+
+    <div class="row">
+      <button id="btn-start" class="primary">Starta</button>
+      <button id="btn-calib" class="ghost">Kalibrera kompass</button>
+    </div>
+
+    <details class="card">
+      <summary>Inställningar</summary>
+      <label class="field">
+        <span>Missvisning, grader öst (+) / väst (−)</span>
+        <input id="decl" type="number" step="0.1" inputmode="decimal">
+      </label>
+      <p class="note">Kompassen i telefonen visar magnetisk nord. Missvisningen ställer om till sann nord. I Göteborgstrakten är den ca +4 till +5° (öst). Kolla gärna aktuellt värde, t.ex. på NOAA:s missvisningskalkylator.</p>
+      <label class="field">
+        <span>Egen position manuellt (om GPS saknas)</span>
+        <input id="manual-pos" type="text" placeholder="57.70, 11.97 eller Maps-länk">
+      </label>
+      <button id="btn-manual" class="ghost">Använd manuell position</button>
+      <p class="note" id="manual-msg"></p>
+    </details>
+
+    <details class="card">
+      <summary>Så använder du det</summary>
+      <ol class="steps">
+        <li>Välj mast och tryck <b>Starta</b>. Godkänn plats.</li>
+        <li>Håll telefonen platt (eller stående, då är det baksidan som pekar). Håll den borta från metall och magneter.</li>
+        <li>Vrid dig tills pilen pekar rakt upp och rutan blir grön (±5°).</li>
+        <li>Rikta antennens riktning (loben) åt samma håll. Ligger antennen på ett maströr, håll telefonen längs antennen.</li>
+        <li>Verifiera sedan med NanoVNA (SWR/LOGMAG) och, för bästa effekt, signalstyrka.</li>
+      </ol>
+    </details>
+  </div>
+</section>
+
+<!-- ===================== MASTER ===================== -->
+<section id="view-masts" class="view">
+  <h2>Master</h2>
+  <div id="mast-list"></div>
+
+  <div class="card">
+    <h3>Lägg till mast</h3>
+    <label class="field"><span>Namn</span><input id="m-name" type="text" placeholder="t.ex. Aleklätten mast"></label>
+    <label class="field"><span>Koordinater eller Maps-länk</span>
+      <textarea id="m-input" rows="3" placeholder="57.9045, 12.0184&#10;eller en länk från Google Maps"></textarea></label>
+    <div class="row">
+      <button id="m-save" class="primary">Spara mast</button>
+    </div>
+    <p class="note" id="m-msg"></p>
+    <p class="note">Fungerar med koordinater (57.9045, 12.0184), grader/minuter/sekunder och Google Maps-länkar, även korta länkar (maps.app.goo.gl) när appen har internet.</p>
+  </div>
+</section>
+
+<!-- ===================== GUIDE ===================== -->
+<section id="view-guide" class="view">
+  <h2>NanoVNA antennguide</h2>
+  <p class="lead">LOGMAG, SWR och Smith: vad som är bra, hur kortslutning ser ut och hur du läser reflektioner.</p>
+
+  <details class="card g" open>
+    <summary>Snabbsvar: så ser en bra antenn ut</summary>
+    <div class="tbl"><table>
+      <tr><th>Vy</th><th>Bra</th><th>Titta på</th></tr>
+      <tr class="ok"><td>SWR</td><td>under 1,5 (bra)<br>under 2,0 (OK)</td><td>Lägsta punkten i dippen och bredden under 2,0</td></tr>
+      <tr class="ok"><td>LOGMAG (S11)</td><td>−14 dB eller lägre (bra)<br>−10 dB (OK)</td><td>Djup dipp = lite reflektion. 0 dB = allt reflekteras</td></tr>
+      <tr class="ok"><td>Smith</td><td>Spåret passerar nära mitten (50 ohm)</td><td>Avstånd från mitten = reflektion</td></tr>
+    </table></div>
+    <p><b>Kortslutning och öppen krets:</b> LOGMAG ligger platt nära 0 dB, SWR är mycket högt och Smith-spåret ligger på yttre kanten. Kortslutning ligger till <b>vänster</b>, öppen krets till <b>höger</b>.</p>
+  </details>
+
+  <details class="card g">
+    <summary>1. Förberedelser och kalibrering</summary>
+    <ul>
+      <li><b>Kalibrera alltid</b> efter att du ställt in START/STOP. Ändrar du sweepen efteråt blir mätningen osäker.</li>
+      <li>Kalibrera på <b>CH0</b> med OPEN, SHORT och LOAD (50 ohm), sedan DONE och spara i ett minne.</li>
+      <li>Kalibrera i <b>samma punkt</b> som du ansluter det du mäter: vid kabelns ände om du mäter via kabel.</li>
+      <li>Kontroll: med en 50 ohm-last ska SWR vara nära 1,0 och LOGMAG lägre än −35 dB.</li>
+      <li>Sätt mätområdet 2–3 gånger bredare än bandet så du ser var dippen verkligen ligger.</li>
+      <li>Dra SMA-kontakterna ordentligt. Lösa kontakter ger hoppiga kurvor.</li>
+    </ul>
+  </details>
+
+  <details class="card g">
+    <summary>2. LOGMAG (S11, återförlust)</summary>
+    <img src="img/logmag.png" alt="LOGMAG med bra, OK och dåliga zoner">
+    <p>LOGMAG på S11 visar hur många dB som <b>kommer tillbaka</b> från antennen. Ju mer negativt, desto bättre. 0 dB betyder att allt reflekteras.</p>
+    <p>Du letar efter en <b>dipp</b>. Dippens frekvens är antennens resonans. Ligger den över önskad frekvens är antennen för kort, under är den för lång.</p>
+    <h4>SWR, återförlust och reflekterad effekt</h4>
+    <div class="tbl"><table>
+      <tr><th>SWR</th><th>LOGMAG</th><th>Reflekt.</th><th>Bedömning</th></tr>
+      <tr class="ok"><td>1,1</td><td>−26,4 dB</td><td>0,2 %</td><td>Utmärkt</td></tr>
+      <tr class="ok"><td>1,2</td><td>−20,8 dB</td><td>0,8 %</td><td>Mycket bra</td></tr>
+      <tr class="ok"><td>1,3</td><td>−17,7 dB</td><td>1,7 %</td><td>Bra</td></tr>
+      <tr class="ok"><td>1,5</td><td>−14,0 dB</td><td>4,0 %</td><td>Bra / godkänt</td></tr>
+      <tr class="warn"><td>1,8</td><td>−10,9 dB</td><td>8,2 %</td><td>Godkänt</td></tr>
+      <tr class="warn"><td>2,0</td><td>−9,5 dB</td><td>11,1 %</td><td>Gräns för OK</td></tr>
+      <tr class="mid"><td>3,0</td><td>−6,0 dB</td><td>25 %</td><td>Dåligt</td></tr>
+      <tr class="bad"><td>5,0</td><td>−3,5 dB</td><td>44 %</td><td>Mycket dåligt</td></tr>
+      <tr class="bad"><td>10</td><td>−1,7 dB</td><td>67 %</td><td>Nästan kortslutet/öppet</td></tr>
+    </table></div>
+    <p class="note">|Γ| = (SWR − 1)/(SWR + 1). Återförlust = −20·log10(|Γ|).</p>
+  </details>
+
+  <details class="card g">
+    <summary>3. SWR-vyn</summary>
+    <img src="img/swr.png" alt="SWR med zoner och bandbredd">
+    <ul>
+      <li>SWR 1,0 är perfekt. Mycket högt värde (999) betyder nästan total reflektion.</li>
+      <li><b>Bandbredd</b> = frekvensområdet där SWR är under 2,0 (eller 1,5 om du vill vara striktare). Läs av med markörer.</li>
+      <li>Lägsta SWR hamnar inte alltid exakt där reaktansen är noll. För antennjustering är lägsta SWR det som räknas i praktiken.</li>
+      <li>Mycket lågt SWR på lång, dålig koax kan vara falskt bra: kabelförlusten döljer reflektionen. Mät helst vid antennen.</li>
+    </ul>
+  </details>
+
+  <details class="card g">
+    <summary>4. Smith-diagrammet</summary>
+    <img src="img/smith_main.png" alt="Smith-diagram förklarat">
+    <ul>
+      <li><b>Mitten</b> = 50 ohm, perfekt matchning (SWR 1,0).</li>
+      <li><b>Vänstra kanten</b> = kortslutning. <b>Högra kanten</b> = öppen krets.</li>
+      <li><b>Övre halvan</b> = induktiv: antennen för lång eller frekvensen för hög.</li>
+      <li><b>Nedre halvan</b> = kapacitiv: antennen för kort eller frekvensen för låg.</li>
+      <li><b>Horisontella axeln</b> = ren resistans, ingen reaktans (resonans).</li>
+      <li><b>Avstånd från mitten</b> = hur stor reflektionen är. Cirklar runt mitten är konstant SWR. Den streckade är SWR 2:1.</li>
+      <li>Spåret går <b>medurs</b> när frekvensen ökar.</li>
+    </ul>
+    <h4>Vad du vill se</h4>
+    <ul>
+      <li>Spåret gör en liten sväng som <b>passerar nära mitten</b> vid din frekvens, helst inom SWR 2:1-cirkeln.</li>
+      <li>Korsar spåret axeln långt åt <b>höger</b> (R för hög, t.ex. 100 ohm+): behöver lägre impedans, t.ex. 1:2-balun.</li>
+      <li>Korsar spåret axeln långt åt <b>vänster</b> (R för låg): behöver högre impedans eller bättre jordplan/radialer.</li>
+      <li>Övre halvan vid din frekvens: korta antennen. Nedre halvan: förläng den.</li>
+    </ul>
+    <img src="img/smith_cases.png" alt="Smith: bra, felmatchad, kortslutning, öppen">
+  </details>
+
+  <details class="card g">
+    <summary>5. Kortslutning och öppen krets</summary>
+    <img src="img/logmag_fel.png" alt="Platt kurva nära 0 dB = fel">
+    <div class="tbl"><table>
+      <tr><th></th><th>Kortslutning</th><th>Öppen krets</th></tr>
+      <tr><td>LOGMAG</td><td>Platt nära 0 dB</td><td>Platt nära 0 dB</td></tr>
+      <tr><td>SWR</td><td>Mycket högt / 999</td><td>Mycket högt / 999</td></tr>
+      <tr><td>Smith</td><td>Punkt på <b>vänstra</b> kanten</td><td>Punkt på <b>högra</b> kanten</td></tr>
+      <tr><td>Fas</td><td>ca 180°</td><td>ca 0°</td></tr>
+      <tr><td>Orsak</td><td>Kortsluten kontakt/skarv, skadad koax</td><td>Antenn ej ansluten, bruten kabel, dålig kontakt</td></tr>
+    </table></div>
+    <ul>
+      <li>Med en kabel före felet <b>snurrar</b> Smith-spåret runt yttre kanten när frekvensen ändras. Det är normalt och visar att kabeln är hel fram till felet.</li>
+      <li>Med förlust i kabeln spiralar spåret <b>inåt</b> mot mitten i stället för att ligga på kanten.</li>
+      <li><b>Snabb multimeterkontroll</b> (urkopplad): mellan centrumledare och skärm ska du mäta oändligt, utom på DC-jordade antenner. 0 ohm = kortslutning.</li>
+      <li>Ser du <b>0 dB över hela bandet</b> trots ansluten antenn: kontrollera kontakter, adapter och att du mäter på CH0.</li>
+    </ul>
+  </details>
+
+  <details class="card g">
+    <summary>6. Hur ser jag reflektioner?</summary>
+    <div class="tbl"><table>
+      <tr><th>Vy</th><th>Lite reflektion</th><th>Mycket reflektion</th></tr>
+      <tr><td>LOGMAG</td><td class="okc">Djup dipp (−15 dB eller lägre)</td><td class="badc">Nära 0 dB</td></tr>
+      <tr><td>SWR</td><td class="okc">Nära 1,0</td><td class="badc">3 eller mer</td></tr>
+      <tr><td>Smith</td><td class="okc">Nära mitten</td><td class="badc">Nära eller på kanten</td></tr>
+    </table></div>
+    <ul>
+      <li>Reflektionskoefficienten Γ = (Z − 50)/(Z + 50). Z = 50 ohm ger Γ = 0.</li>
+      <li><b>Kabelförlusttips:</b> lämna kabelns ände öppen och mät S11 LOGMAG. Kabelförlusten är ungefär hälften av det du ser. Ser du −6 dB är kabeln ca 3 dB dämpad.</li>
+      <li>Vissa NanoVNA-modeller har TDR/tidsdomän som visar avstånd till felet.</li>
+    </ul>
+  </details>
+
+  <details class="card g">
+    <summary>7. Vanliga fel</summary>
+    <div class="tbl"><table>
+      <tr><th>Symptom</th><th>Orsak</th><th>Åtgärd</th></tr>
+      <tr><td>SWR ändras när du rör koaxen</td><td>Mantelströmmar</td><td>Ferritkärna/balun vid antennen</td></tr>
+      <tr><td>Bra SWR på fel frekvens</td><td>Kalibrerat för annat område</td><td>Kalibrera om vid rätt START/STOP</td></tr>
+      <tr><td>Hoppig kurva</td><td>Lös SMA-kontakt, dålig last</td><td>Dra åt, byt standarder</td></tr>
+      <tr><td>Allt 0 dB / SWR 999</td><td>Ej ansluten, kortslutning, fel port</td><td>Kolla kabel, kontakter, CH0</td></tr>
+      <tr><td>Dippen bredvid frekvensen</td><td>Antennen för kort/lång</td><td>Justera i små steg, mät om</td></tr>
+      <tr><td>Lågt SWR trots tveksam antenn</td><td>Kabelförlust döljer</td><td>Mät vid antennen</td></tr>
+      <tr><td>Instabil mätning</td><td>Kabel rörd efter kalibrering</td><td>Kalibrera i slutligt läge</td></tr>
+    </table></div>
+  </details>
+
+  <details class="card g">
+    <summary>8. Snabb mätprocedur</summary>
+    <ol class="steps">
+      <li>Ställ in START/STOP kring bandet.</li>
+      <li>Kalibrera OPEN, SHORT, LOAD på CH0 vid kabelns ände. DONE, spara.</li>
+      <li>Kontrollera med 50 ohm-last: SWR nära 1,0.</li>
+      <li>Visa S11 LOGMAG, SWR och Smith. Sätt markörer på dippen.</li>
+      <li>Anslut antennen. Notera dippens frekvens, minsta SWR och bandbredd (SWR under 2).</li>
+      <li>Kolla Smith: passerar spåret nära mitten? Övre eller nedre halvan?</li>
+      <li>Justera antennen, mät om. Röra koaxen? Då finns mantelströmmar.</li>
+    </ol>
+    <p class="note">Riktvärdena är allmänna. Vad som är &quot;bra nog&quot; beror på din sändare, kabel och band.</p>
+  </details>
+</section>
+</main>
+
+<nav class="tabs">
+  <button data-view="aim" class="active"><span class="ic">&#x1F9ED;</span>Rikta</button>
+  <button data-view="masts"><span class="ic">&#x1F4E1;</span>Master</button>
+  <button data-view="guide"><span class="ic">&#x1F4D8;</span>Guide</button>
+</nav>
+
+<script type="module" src="app.js"></script>
+</body>
+</html>
